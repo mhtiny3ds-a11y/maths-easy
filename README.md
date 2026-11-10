@@ -21,6 +21,13 @@ Web app học Toán cho học sinh tiểu học, lớp 1 đến lớp 5, sắp x
 - **Donate:** ở màn Ba mẹ đăng nhập và cuối tab Tổng quan có mã QR chuyển khoản "Donate Pi ly cafe cho tỉnh táo nếu ba mẹ thấy ổn nè ☕" (sửa trong `js/donate.js`), kèm ghi chú ủng hộ là tự nguyện, không ràng buộc.
 - Lớp 1–2: nếu máy có giọng đọc tiếng Việt, đề bài được đọc to tự động; nút 🔊 để nghe lại.
 
+## Tài liệu
+
+- 📘 [Hướng dẫn sử dụng (PDF)](docs/Huong-dan-su-dung-Toan-Vui-cung-Pi.pdf)
+- 📗 [Giới thiệu (PDF)](docs/Gioi-thieu-Toan-Vui-cung-Pi.pdf)
+- 📣 [Nội dung đăng Facebook](docs/facebook/noi-dung-dang-facebook.md) và ảnh trong `docs/facebook/`
+- Ảnh màn hình app: `docs/images/`. Mã nguồn tài liệu: `docs/src/` (mở bằng trình duyệt, in ra PDF).
+
 ## Tài khoản mẫu
 
 Bấm **Mở gia đình mẫu** ở màn hình đầu (khung này tự ẩn khi máy đã có tài khoản thật).
