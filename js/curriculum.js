@@ -1,6 +1,6 @@
 /* =========================================================
    Chương trình Toán tiểu học lớp 1–5 (Chương trình GDPT 2018).
-   Thứ tự chủ đề và bài học tham khảo bộ SGK "Kết nối tri thức với cuộc sống".
+   Lộ trình sắp xếp theo các mạch kiến thức của chương trình; nội dung do ứng dụng tự biên soạn.
    Định dạng:
      #<lớp>
      @<Tên chủ đề>|<biểu tượng>|<nhiệm vụ thực tế làm cùng ba mẹ>

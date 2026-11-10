@@ -1,5 +1,5 @@
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}
-/* Bố cục: một cột kiểu ứng dụng điện thoại (tối đa 480px), thanh tab dưới, mascot dẫn đường xuyên suốt. Phong cách đồng bộ với Lumi English. */
+/* Bố cục: một cột kiểu ứng dụng điện thoại (tối đa 480px), thanh tab dưới, mascot dẫn đường xuyên suốt. */
 :root{
   --bg:#FFF5E4; --bg-2:#FCE9CC; --surface:#FFFFFF; --surface-2:#FFF1DA; --line:#EBD8BC;
   --ink:#2B1D14; --ink-2:#6E5848; --ink-3:#A08B79;

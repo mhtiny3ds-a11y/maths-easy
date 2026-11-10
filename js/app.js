@@ -202,15 +202,20 @@ function render() {
 }
 
 /* ---------- màn chào / đăng nhập ---------- */
-const DISCLAIMER = `<p>${APP_NAME} là ứng dụng <b>độc lập, miễn phí</b>, được thiết kế <b>bám sát Chương trình môn Toán tiểu học (GDPT 2018)</b>, lớp 1–5. Thứ tự chủ đề và bài học tham khảo bộ sách giáo khoa Toán "Kết nối tri thức với cuộc sống".</p><p>Ứng dụng <b>không phải sản phẩm chính thức</b> của Nhà xuất bản Giáo dục Việt Nam hay của bộ sách, và không có liên kết với các đơn vị này. Câu hỏi luyện tập do ứng dụng tự sinh để con ôn luyện thêm, không thay thế sách giáo khoa và giờ học trên lớp.</p>`;
+const DISCLAIMER = `<p><b>1. Về ứng dụng.</b> ${APP_NAME} là ứng dụng cá nhân, độc lập, <b>miễn phí hoàn toàn</b>, không quảng cáo, không bán hàng, không thu phí dưới bất kỳ hình thức nào. Ứng dụng không đại diện, không liên kết và không được bảo trợ bởi bất kỳ tổ chức, cơ quan hay đơn vị nào.</p>
+<p><b>2. Về nội dung bài học.</b> Lộ trình được sắp xếp theo các mạch kiến thức của Chương trình môn Toán tiểu học (GDPT 2018) do Nhà nước ban hành công khai. Toàn bộ phần ghi nhớ, ví dụ, câu hỏi, nhiệm vụ và hình vẽ do ứng dụng <b>tự biên soạn và tự sinh ngẫu nhiên</b>, không sao chép từ bất kỳ tài liệu, sách hay sản phẩm nào khác. Nội dung chỉ mang tính <b>tham khảo, ôn luyện thêm</b>, có thể còn sai sót, không thay thế giáo viên, sách giáo khoa và giờ học trên lớp. Ứng dụng được cung cấp "nguyên trạng", không cam kết hay bảo đảm về kết quả học tập. Ba mẹ nên đồng hành và kiểm tra cùng con.</p>
+<p><b>3. Về sao thưởng.</b> Quy đổi "1 sao = 1.000đ" chỉ là <b>gợi ý để ba mẹ tự thỏa thuận và tự thưởng cho con</b> trong gia đình. Ứng dụng không giữ tiền, không chuyển tiền, không phát sinh nghĩa vụ tài chính hay ràng buộc nào giữa ứng dụng với người dùng. Ba mẹ toàn quyền quyết định có thưởng hay không và mức thưởng.</p>
+<p><b>4. Về ủng hộ (donate).</b> Việc ủng hộ là <b>hoàn toàn tự nguyện</b>, mang tính chất cho tặng, <b>không phải tiền mua sản phẩm hay dịch vụ</b>. Ủng hộ hay không đều dùng ứng dụng như nhau; người ủng hộ không nhận thêm quyền lợi, không có hợp đồng, không phát sinh nghĩa vụ hay trách nhiệm pháp lý nào giữa hai bên, và khoản ủng hộ không được hoàn lại. Vui lòng chỉ ủng hộ trong khả năng của mình và tự kiểm tra kỹ thông tin trước khi chuyển.</p>
+<p><b>5. Về dữ liệu.</b> Tài khoản, tiến độ và sao chỉ lưu trong trình duyệt trên máy của người dùng. Ứng dụng không thu thập, không gửi đi và không lưu trữ dữ liệu cá nhân trên máy chủ nào. Người dùng tự chịu trách nhiệm sao lưu; dữ liệu có thể mất khi xóa dữ liệu trình duyệt.</p>
+<p><b>6. Giới hạn trách nhiệm.</b> Người phát triển không chịu trách nhiệm đối với bất kỳ thiệt hại trực tiếp hay gián tiếp nào phát sinh từ việc sử dụng ứng dụng. Việc sử dụng ứng dụng đồng nghĩa với việc ba mẹ đã đọc và đồng ý với các lưu ý trên.</p>`;
 function donateBlock() {
   if (typeof DONATE_QR === 'undefined') return '';
   return `<section class="card stack" aria-labelledby="donate-h">
     <div class="row">${pi('cheer', 52)}<h2 class="h3" id="donate-h" style="flex:1;min-width:0">Donate Pi ly cafe cho tỉnh táo nếu ba mẹ thấy ổn nè ☕</h2></div>
-    <img src="${DONATE_QR}" alt="Mã VietQR ủng hộ: ${DONATE.name}, ${DONATE.bank}, số tài khoản ${DONATE.acct}" style="width:100%;max-width:250px;align-self:center;border-radius:16px;border:2px solid var(--line)">
+    <img src="${DONATE_QR}" alt="Mã QR ủng hộ: ${DONATE.name}, ${DONATE.bank}, số tài khoản ${DONATE.acct}" style="width:100%;max-width:250px;align-self:center;border-radius:16px;border:2px solid var(--line)">
     <div class="row between wrap"><div style="min-width:0"><b>${DONATE.name}</b><div class="tiny muted" style="font-weight:700">${DONATE.bank} · <span class="num" id="donate-acct" style="user-select:all">${DONATE.acct}</span></div></div><button type="button" class="btn sm ghost" data-act="copyAcct">📋 Chép số tài khoản</button></div>
-    <p class="tiny muted" style="font-weight:700">Mở app ngân hàng bất kỳ, chọn quét mã VietQR / Napas 247.</p>
-    <p class="demo tiny">Mọi sự ủng hộ là hoàn toàn tự nguyện để duy trì và phát triển ứng dụng miễn phí, không đi kèm nghĩa vụ hay dịch vụ thương mại.</p>
+    <p class="tiny muted" style="font-weight:700">Mở ứng dụng ngân hàng của ba mẹ và quét mã QR để chuyển khoản.</p>
+    <p class="demo tiny"><b>Lưu ý:</b> ủng hộ là hoàn toàn tự nguyện, mang tính cho tặng, không phải tiền mua sản phẩm hay dịch vụ. Ủng hộ hay không đều dùng ứng dụng như nhau, không kèm quyền lợi, không phát sinh hợp đồng, nghĩa vụ hay trách nhiệm pháp lý nào giữa hai bên và không hoàn lại.</p>
   </section>`;
 }
 function spreadBlock() {
@@ -237,7 +242,8 @@ function vWelcome() {
   ${hasRealFamily() ? '' : `<div class="demo">Muốn xem thử? <button class="link" data-act="demo">Mở gia đình mẫu</button> · ba mẹ: <b>demo</b> / <b>123456</b> · Bông lớp 1: PIN <b>1111</b> · Tí lớp 3: PIN <b>2222</b></div>`}
   <div class="stack" style="gap:8px"><p class="tiny muted" style="text-align:center;font-weight:700">Dùng máy mới? Khôi phục tài khoản từ file sao lưu:</p>${restoreBlock(false)}</div>
   <p class="sync">${syncLabel()}</p>
-  <p class="tiny muted" style="text-align:center;font-weight:600;max-width:52ch;margin:0 auto">Ứng dụng độc lập, bám sát Chương trình môn Toán tiểu học. Không phải ứng dụng chính thức của NXB Giáo dục Việt Nam.</p>`;
+  <p class="tiny muted" style="text-align:center;font-weight:600;max-width:52ch;margin:0 auto">Ứng dụng cá nhân, độc lập, miễn phí. Nội dung tự biên soạn, chỉ mang tính tham khảo và ôn luyện thêm.</p>
+  <details class="card"><summary style="font-weight:800;cursor:pointer">📜 Lưu ý & miễn trừ trách nhiệm</summary><div class="stack tiny" style="margin-top:10px;font-weight:600">${DISCLAIMER}</div></details>`;
 }
 function restoreBlock(withExport) {
   return `<div class="row wrap" style="justify-content:${withExport ? 'flex-start' : 'center'}">${withExport ? '<button class="btn sm jade" data-act="exportData">⬇️ Tải file sao lưu</button>' : ''}<label class="btn sm ghost" for="importFile" style="cursor:pointer">⬆️ Khôi phục từ file sao lưu</label><input type="file" id="importFile" accept="application/json,.json" hidden>
@@ -648,7 +654,7 @@ function vPApprove(f) {
 }
 function vPWallet(f) {
   const weeks = [...Array(6)].map((_, k) => weekKey(addDays(new Date(), -7 * k)));
-  return `<div class="say">${bi(56)}<div class="bubble" style="font-weight:600">Mỗi sao = <b>1.000đ</b>. Hệ thống tự dừng tính thưởng khi con đạt <b>${capOf(f)} sao/tuần</b>. Trao tiền xong, ba mẹ bấm "Đã trao" để ghi sổ.</div></div>`
+  return `<div class="say">${bi(56)}<div class="bubble" style="font-weight:600">Gợi ý: mỗi sao = <b>1.000đ</b> do ba mẹ tự thưởng. Hệ thống tự dừng tính thưởng khi con đạt <b>${capOf(f)} sao/tuần</b>. Trao tiền xong, ba mẹ bấm "Đã trao" để ghi sổ.</div></div>`
   + f.children.map(c => {
     const up = unpaid(f, c.id);
     const conf = UI.confirm === 'pay:' + c.id;
@@ -684,9 +690,9 @@ function vPAccount(f) {
   <details class="card"><summary style="font-weight:800;cursor:pointer">Cách tính sao & thưởng</summary><div class="stack tiny" style="margin-top:10px;font-weight:600">
     <p>• Mỗi bài có 2 bước: <b>Bài học</b> và <b>Luyện tập</b>, mỗi bước được 1–3 sao theo tỉ lệ trả lời đúng lần đầu (từ 90%: 3 sao, từ 70%: 2 sao). Làm lại chỉ được thêm phần sao vượt kỷ lục cũ.</p>
     <p>• Bài ôn tập cuối chủ đề, ôn tập học kì: tối đa 3 sao. Nhiệm vụ thực tế: +${MISSION_STARS} sao khi ba mẹ xác nhận.</p>
-    <p>• 1 sao = 1.000đ. Tuần tính từ thứ Hai đến Chủ nhật, tối đa ${capOf(f)} sao/tuần (không quá ${MAX_CAP} sao).</p>
-    <p>• Mỗi lớp đi theo đúng thứ tự chủ đề và bài học của chương trình.</p></div></details>
-  <details class="card"><summary style="font-weight:800;cursor:pointer">Giới thiệu & lưu ý</summary><div class="stack tiny" style="margin-top:10px;font-weight:600">${DISCLAIMER}</div></details>
+    <p>• 1 sao = 1.000đ là mức gợi ý để ba mẹ tự thưởng cho con; ứng dụng không giữ hay chuyển tiền. Tuần tính từ thứ Hai đến Chủ nhật, tối đa ${capOf(f)} sao/tuần (không quá ${MAX_CAP} sao).</p>
+    <p>• Mỗi lớp đi theo thứ tự các mạch kiến thức của chương trình.</p></div></details>
+  <details class="card"><summary style="font-weight:800;cursor:pointer">📜 Lưu ý & miễn trừ trách nhiệm</summary><div class="stack tiny" style="margin-top:10px;font-weight:600">${DISCLAIMER}</div></details>
   <h2 class="h3">Sao lưu dữ liệu</h2>
   <section class="card stack"><p class="tiny muted" style="font-weight:700">Dữ liệu chỉ nằm trong trình duyệt của máy này. Tải file sao lưu để chuyển sang máy khác hoặc phòng khi xóa lịch sử trình duyệt.</p>
     ${restoreBlock(true)}
@@ -788,7 +794,7 @@ const ACT = {
   share: () => {
     const url = location.href.split('#')[0].split('?')[0];
     const text = `${APP_NAME}: app học Toán tiểu học lớp 1–5 miễn phí, bám sát chương trình GDPT 2018. Ba mẹ đồng hành cùng con 15 phút mỗi ngày nha!`;
-    const copy = () => { try { navigator.clipboard.writeText(text + ' ' + url).then(() => toast('Đã chép lời giới thiệu và link. Ba mẹ dán vào Zalo/Facebook nhé!'), () => toast('Link: ' + url)); } catch (e) { toast('Link: ' + url); } };
+    const copy = () => { try { navigator.clipboard.writeText(text + ' ' + url).then(() => toast('Đã chép lời giới thiệu và link. Ba mẹ dán vào tin nhắn để gửi bạn bè nhé!'), () => toast('Link: ' + url)); } catch (e) { toast('Link: ' + url); } };
     if (navigator.share) navigator.share({ title: APP_NAME, text, url }).catch(err => { if (err && err.name !== 'AbortError') copy(); });
     else copy();
   },
