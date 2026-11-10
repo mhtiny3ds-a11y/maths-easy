@@ -18,7 +18,7 @@ Web app học Toán cho học sinh tiểu học, lớp 1 đến lớp 5, sắp x
   - *Thưởng:* số tiền chưa trao, bảng sao theo tuần, ghi sổ "Đã trao thưởng".
   - *Tài khoản:* thêm/sửa/xóa hồ sơ con, đổi PIN, mật khẩu, mức sao tối đa, mở khóa toàn bộ bài, sao lưu và khôi phục dữ liệu.
   - Khu vực ba mẹ tự khóa sau 10 phút không thao tác. Quên mật khẩu thì đặt lại bằng mã PIN ba mẹ.
-- **Donate:** ở màn Ba mẹ đăng nhập và cuối tab Tổng quan có mã QR chuyển khoản "Donate Pi ly cafe cho tỉnh táo nếu ba mẹ thấy ổn nè ☕" (sửa trong `js/donate.js`), kèm ghi chú ủng hộ là tự nguyện, không ràng buộc.
+- **Ủng hộ (donate):** ở màn Ba mẹ đăng nhập và cuối tab Tổng quan có mục "Tiếp lửa để Team Mèo Pi thêm động lực đồng hành và phát triển cùng con nha ba mẹ ☕". Ba mẹ chọn mức gợi ý **39k, 59k, 99k** (mã QR có sẵn số tiền) hoặc **Tuỳ tâm** (mã QR gốc, tự nhập số tiền), và bấm **⬇️ Tải mã QR** để lưu ảnh rồi mở trong ứng dụng ngân hàng. Kèm ghi chú ủng hộ là tự nguyện, không ràng buộc. Thông tin tài khoản và các mức sửa trong `js/donate.js`.
 - Lớp 1–2: nếu máy có giọng đọc tiếng Việt, đề bài được đọc to tự động; nút 🔊 để nghe lại.
 
 ## Tài liệu
@@ -44,7 +44,8 @@ Bấm **Mở gia đình mẫu** ở màn hình đầu (khung này tự ẩn khi 
 - `js/gen.js`: bộ sinh câu hỏi và chấm đáp án (khoảng 90 dạng bài).
 - `js/mascots.js`: hình vẽ các nhân vật.
 - `js/app.js`: tài khoản, lộ trình, bài học, sao thưởng, khu vực ba mẹ.
-- `js/donate.js`: mã QR ủng hộ.
+- `js/donate.js`: thông tin ủng hộ, mã QR gốc và các mức gợi ý.
+- `js/vendor/qrcode.js`: thư viện tạo mã QR (giấy phép MIT).
 - `tests/gen.test.js`: sinh thử mọi dạng bài hàng trăm lần để kiểm tra đáp án. Chạy `node tests/gen.test.js`.
 
 ### Sửa nội dung bài học

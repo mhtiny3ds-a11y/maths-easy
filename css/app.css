@@ -341,3 +341,5 @@ p{margin:0}
 .feedback .msg span{display:block;margin-top:2px;max-height:30vh;overflow:auto}
 .player{padding-bottom:220px}
 body.still .qcard,body.still .exq,body.still .flash{animation:none}
+.donlv{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.donlv .chip{padding:0 4px;font-size:15px;white-space:nowrap}

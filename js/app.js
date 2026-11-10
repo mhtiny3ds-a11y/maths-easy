@@ -208,14 +208,57 @@ const DISCLAIMER = `<p><b>1. Về ứng dụng.</b> ${APP_NAME} là ứng dụng
 <p><b>4. Về ủng hộ (donate).</b> Việc ủng hộ là <b>hoàn toàn tự nguyện</b>, mang tính chất cho tặng, <b>không phải tiền mua sản phẩm hay dịch vụ</b>. Ủng hộ hay không đều dùng ứng dụng như nhau; người ủng hộ không nhận thêm quyền lợi, không có hợp đồng, không phát sinh nghĩa vụ hay trách nhiệm pháp lý nào giữa hai bên, và khoản ủng hộ không được hoàn lại. Vui lòng chỉ ủng hộ trong khả năng của mình và tự kiểm tra kỹ thông tin trước khi chuyển.</p>
 <p><b>5. Về dữ liệu.</b> Tài khoản, tiến độ và sao chỉ lưu trong trình duyệt trên máy của người dùng. Ứng dụng không thu thập, không gửi đi và không lưu trữ dữ liệu cá nhân trên máy chủ nào. Người dùng tự chịu trách nhiệm sao lưu; dữ liệu có thể mất khi xóa dữ liệu trình duyệt.</p>
 <p><b>6. Giới hạn trách nhiệm.</b> Người phát triển không chịu trách nhiệm đối với bất kỳ thiệt hại trực tiếp hay gián tiếp nào phát sinh từ việc sử dụng ứng dụng. Việc sử dụng ứng dụng đồng nghĩa với việc ba mẹ đã đọc và đồng ý với các lưu ý trên.</p>`;
+/* ---------- ủng hộ: mã QR theo từng mức ---------- */
+function emvCrc(str) { let c = 0xFFFF; for (const ch of str) { c ^= ch.charCodeAt(0) << 8; for (let i = 0; i < 8; i++) c = c & 0x8000 ? ((c << 1) ^ 0x1021) & 0xFFFF : (c << 1) & 0xFFFF; } return c.toString(16).toUpperCase().padStart(4, '0'); }
+function tlvParse(s) { const out = []; let i = 0; while (i + 4 <= s.length) { const tag = s.slice(i, i + 2), len = +s.slice(i + 2, i + 4); out.push([tag, s.slice(i + 4, i + 4 + len)]); i += 4 + len; } return out; }
+const tlvBuild = arr => arr.map(([t, v]) => t + String(v.length).padStart(2, '0') + v).join('');
+/* Thêm số tiền (tag 54) và nội dung chuyển khoản vào mã QR gốc, tính lại mã kiểm tra CRC. Tài khoản nhận giữ nguyên. */
+function donatePayload(amount) {
+  let f = tlvParse(DONATE_PAYLOAD).filter(([t]) => t !== '63' && t !== '54');
+  f = f.map(([t, v]) => {
+    if (t === '01') return [t, '12'];
+    if (t === '62') { const sub = tlvParse(v).filter(([k]) => k !== '08'); sub.push(['08', DONATE_NOTE]); sub.sort((a, b) => a[0].localeCompare(b[0])); return [t, tlvBuild(sub)]; }
+    return [t, v];
+  });
+  f.push(['54', String(amount)]); f.sort((a, b) => a[0].localeCompare(b[0]));
+  const body = tlvBuild(f) + '6304'; return body + emvCrc(body);
+}
+const DQR_CACHE = {};
+try { document.fonts.ready.then(() => { for (const k in DQR_CACHE) delete DQR_CACHE[k]; if (document.getElementById('donate-h')) render(); }); } catch (e) {}
+/* Vẽ thẻ mã QR (có tên, số tiền) ra ảnh PNG để hiển thị và tải về */
+function donateImage(amount) {
+  if (!amount) return DONATE_QR;
+  if (DQR_CACHE[amount]) return DQR_CACHE[amount];
+  try {
+    const q = qrcode(0, 'M'); q.addData(donatePayload(amount)); q.make();
+    const n = q.getModuleCount(), cell = Math.floor(440 / (n + 8)), qs = cell * (n + 8);
+    const W = 520, H = qs + 250, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const x = cv.getContext('2d');
+    x.fillStyle = '#FFF5E4'; x.fillRect(0, 0, W, H);
+    x.fillStyle = '#fff'; x.beginPath(); x.roundRect ? x.roundRect(20, 20, W - 40, H - 40, 24) : x.rect(20, 20, W - 40, H - 40); x.fill();
+    x.fillStyle = '#2F6FE4'; x.font = '800 30px "Baloo 2", sans-serif'; x.textAlign = 'center'; x.fillText('Toán Vui cùng Pi ☕', W / 2, 66);
+    const ox = (W - qs) / 2, oy = 84; x.fillStyle = '#fff'; x.fillRect(ox, oy, qs, qs); x.fillStyle = '#111';
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) x.fillRect(ox + (c + 4) * cell, oy + (r + 4) * cell, cell, cell);
+    x.fillStyle = '#1F9E78'; x.font = '800 40px "Baloo 2", sans-serif'; x.fillText(amount.toLocaleString('vi-VN') + 'đ', W / 2, oy + qs + 46);
+    x.fillStyle = '#2B1D14'; x.font = '800 22px Nunito, sans-serif'; x.fillText(DONATE.name, W / 2, oy + qs + 82);
+    x.fillStyle = '#6E5848'; x.font = '700 18px Nunito, sans-serif'; x.fillText(`${DONATE.bank} · ${DONATE.acct}`, W / 2, oy + qs + 110);
+    x.font = '700 15px Nunito, sans-serif'; x.fillText('Ủng hộ tự nguyện · cảm ơn ba mẹ!', W / 2, oy + qs + 136);
+    return (DQR_CACHE[amount] = cv.toDataURL('image/png'));
+  } catch (e) { return DONATE_QR; }
+}
 function donateBlock() {
   if (typeof DONATE_QR === 'undefined') return '';
+  const lv = (typeof DONATE_LEVELS !== 'undefined' && typeof qrcode !== 'undefined') ? DONATE_LEVELS : [0];
+  const amt = lv.includes(UI.donAmt) ? UI.donAmt : lv[0];
+  const k = v => v ? (v / 1000) + 'k' : 'Tuỳ tâm';
   return `<section class="card stack" aria-labelledby="donate-h">
-    <div class="row">${pi('cheer', 52)}<h2 class="h3" id="donate-h" style="flex:1;min-width:0">Donate Pi ly cafe cho tỉnh táo nếu ba mẹ thấy ổn nè ☕</h2></div>
-    <img src="${DONATE_QR}" alt="Mã QR ủng hộ: ${DONATE.name}, ${DONATE.bank}, số tài khoản ${DONATE.acct}" style="width:100%;max-width:250px;align-self:center;border-radius:16px;border:2px solid var(--line)">
-    <div class="row between wrap"><div style="min-width:0"><b>${DONATE.name}</b><div class="tiny muted" style="font-weight:700">${DONATE.bank} · <span class="num" id="donate-acct" style="user-select:all">${DONATE.acct}</span></div></div><button type="button" class="btn sm ghost" data-act="copyAcct">📋 Chép số tài khoản</button></div>
-    <p class="tiny muted" style="font-weight:700">Mở ứng dụng ngân hàng của ba mẹ và quét mã QR để chuyển khoản.</p>
-    <p class="demo tiny"><b>Lưu ý:</b> ủng hộ là hoàn toàn tự nguyện, mang tính cho tặng, không phải tiền mua sản phẩm hay dịch vụ. Ủng hộ hay không đều dùng ứng dụng như nhau, không kèm quyền lợi, không phát sinh hợp đồng, nghĩa vụ hay trách nhiệm pháp lý nào giữa hai bên và không hoàn lại.</p>
+    <div class="row">${pi('cheer', 52)}<h2 class="h3" id="donate-h" style="flex:1;min-width:0">Tiếp lửa để Team Mèo Pi thêm động lực đồng hành và phát triển cùng con nha ba mẹ ☕</h2></div>
+    ${lv.length > 1 ? `<div class="donlv" role="radiogroup" aria-label="Chọn mức ủng hộ">${lv.map(v => `<button type="button" class="chip ${v === amt ? 'on' : ''}" style="--c:var(--jade)" role="radio" aria-checked="${v === amt}" data-act="donAmt" data-v="${v}">${k(v)}</button>`).join('')}</div>` : ''}
+    <img src="${donateImage(amt)}" alt="Mã QR ủng hộ ${amt ? amt.toLocaleString('vi-VN') + ' đồng' : 'tuỳ tâm'}: ${DONATE.name}, ${DONATE.bank}, số tài khoản ${DONATE.acct}" style="width:100%;max-width:260px;align-self:center;border-radius:16px;border:2px solid var(--line)">
+    <p class="tiny muted" style="font-weight:700;text-align:center">${amt ? `Mã QR đã có sẵn số tiền <b>${amt.toLocaleString('vi-VN')}đ</b>.` : 'Mã QR không kèm số tiền, ba mẹ tự nhập số tiền tuỳ tâm.'}</p>
+    <div class="row wrap" style="justify-content:center"><button type="button" class="btn sm jade" data-act="dlQR" data-v="${amt}">⬇️ Tải mã QR</button><button type="button" class="btn sm ghost" data-act="copyAcct">📋 Chép số tài khoản</button></div>
+    <div style="min-width:0;text-align:center"><b>${DONATE.name}</b><div class="tiny muted" style="font-weight:700">${DONATE.bank} · <span class="num" id="donate-acct" style="user-select:all">${DONATE.acct}</span></div></div>
+    <p class="tiny muted" style="font-weight:700">Quét mã bằng ứng dụng ngân hàng, hoặc bấm <b>Tải mã QR</b> rồi mở ứng dụng ngân hàng → chọn quét QR → <b>chọn ảnh từ thư viện</b>. Trên iPhone, nếu ảnh mở ra trang mới, nhấn giữ ảnh → <b>Lưu vào Ảnh</b>.</p>
+    <p class="demo tiny"><b>Lưu ý:</b> ủng hộ là hoàn toàn tự nguyện, mang tính cho tặng, không phải tiền mua sản phẩm hay dịch vụ. Các mức chỉ là gợi ý. Ủng hộ hay không đều dùng ứng dụng như nhau, không kèm quyền lợi, không phát sinh hợp đồng, nghĩa vụ hay trách nhiệm pháp lý nào giữa hai bên và không hoàn lại. Ba mẹ vui lòng kiểm tra tên người nhận trước khi chuyển.</p>
   </section>`;
 }
 function spreadBlock() {
@@ -786,6 +829,12 @@ const ACT = {
   },
   logout: () => { DEV.session = null; saveDev(); go('welcome'); },
   toKids: () => { DEV.session = null; saveDev(); UI.fresh = false; go('profiles'); },
+  donAmt: d => { UI.donAmt = +d.v; render(); },
+  dlQR: d => {
+    const amt = +d.v, url = donateImage(amt), a = document.createElement('a');
+    a.href = url; a.download = `ma-qr-ung-ho-toan-vui${amt ? '-' + amt : '-tuy-tam'}.${url.startsWith('data:image/png') ? 'png' : 'jpg'}`;
+    document.body.appendChild(a); a.click(); a.remove(); toast('Đã tải mã QR. Mở ứng dụng ngân hàng → quét QR → chọn ảnh từ thư viện nhé!');
+  },
   copyAcct: () => {
     const done = () => toast(`Đã chép số tài khoản ${DONATE.acct}`);
     try { navigator.clipboard.writeText(DONATE.acct).then(done, () => { selectAcct(); toast('Số tài khoản đã được chọn, ba mẹ bấm Sao chép nhé.'); }); }
