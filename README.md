@@ -17,6 +17,7 @@ Web app học Toán cho học sinh tiểu học, lớp 1 đến lớp 5, sắp x
   - *Duyệt:* xác nhận nhiệm vụ, tặng thêm sao.
   - *Thưởng:* số tiền chưa trao, bảng sao theo tuần, ghi sổ "Đã trao thưởng".
   - *Tài khoản:* thêm/sửa/xóa hồ sơ con, đổi PIN, mật khẩu, mức sao tối đa, mở khóa toàn bộ bài, sao lưu và khôi phục dữ liệu.
+  - **🔓 Mở khóa bài theo trình độ của con:** từ thẻ của con ở tab Tổng quan hoặc mục Tài khoản, ba mẹ chọn lớp rồi bật mở **bài bất kỳ**, hoặc bấm **Bắt đầu từ đây** để con học tiếp từ bài đó (các bài trước được mở để con ôn khi cần). Có nút **Mở cả lớp** và **Khóa lại như cũ**. Mỗi con cài đặt riêng.
   - Khu vực ba mẹ tự khóa sau 10 phút không thao tác. Quên mật khẩu thì đặt lại bằng mã PIN ba mẹ.
 - **Mời ly Coffee (ủng hộ):** ở màn Ba mẹ đăng nhập và cuối tab Tổng quan có mục "Mời ly Coffee để Mèo Pi có thêm sức mạnh đồng hành và phát triển cùng các con nha ba mẹ ☕". Ba mẹ chọn **Sữa đá**, **Latte** hoặc **Cà phê Muối** (giao diện chỉ hiện tên, số tiền có sẵn trong mã QR), nội dung chuyển khoản "Thank you Pi nha", và bấm **⬇️ Tải mã QR** để lưu ảnh rồi mở trong ứng dụng ngân hàng. Kèm ghi chú ủng hộ là tự nguyện, không ràng buộc. Tên, số tiền từng loại, nội dung và tài khoản sửa trong `js/donate.js`.
 - Lớp 1–2: nếu máy có giọng đọc tiếng Việt, đề bài được đọc to tự động; nút 🔊 để nghe lại.

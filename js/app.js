@@ -103,13 +103,16 @@ const streakNow = p => (p.streak.last === dayKey() || p.streak.last === dayKey(a
 function nodeDone(p, node) { return node.type === 'lesson' ? (p.lessons[node.key + 'a'] > 0 && p.lessons[node.key + 'b'] > 0) : p.lessons[node.key] > 0; }
 function nodeStars(p, node) { return node.type === 'lesson' ? (p.lessons[node.key + 'a'] || 0) + (p.lessons[node.key + 'b'] || 0) : (p.lessons[node.key] || 0); }
 const learnGrade = (f, c) => prog(f, c.id).lastGrade || c.grade;
+/* Ba mẹ có thể mở khóa riêng từng bài (p.unlocked) hoặc cho con bắt đầu từ một bài (p.startAt[lớp]) để hợp trình độ. */
+const startOf = (p, g) => (p.startAt && p.startAt[g]) || 0;
+const isUnlocked = (p, key) => !!(p.unlocked && p.unlocked[key]);
 function nodeStates(f, child, g) {
-  const p = prog(f, child.id), list = nodesOf(g); let currentSet = false;
+  const p = prog(f, child.id), list = nodesOf(g), st = startOf(p, g); let currentSet = false;
   return list.map((n, i) => {
-    const done = nodeDone(p, n);
-    const open = f.unlockAll || i === 0 || nodeDone(p, list[i - 1]);
-    let current = false; if (open && !done && !currentSet) { current = true; currentSet = true; }
-    return { ...n, done, open, current, stars: nodeStars(p, n) };
+    const done = nodeDone(p, n), byParent = isUnlocked(p, n.key) || i <= st;
+    const open = f.unlockAll || i === 0 || nodeDone(p, list[i - 1]) || byParent;
+    let current = false; if (open && !done && !currentSet && i >= st) { current = true; currentSet = true; }
+    return { ...n, done, open, current, byParent, stars: nodeStars(p, n) };
   });
 }
 function lessonsDone(p) { return Object.values(p.lessons).filter(v => v > 0).length; }
@@ -461,12 +464,12 @@ function nodeSheet(g, i) {
       <button class="lessonrow" data-act="startLesson" data-key="${s.key}" data-kind="review" data-g="${g}" data-i="${i}"><span class="ic">🏆</span><span class="tx"><b>Bài ôn tập</b><span class="tiny muted">Tối đa 3 sao</span></span><span class="pill gold">${'★'.repeat(st) || 'Chưa làm'}</span></button>
       ${missionCard(p, g, T)}`;
     }
-    const l = s.l, k = s.key, s1 = p.lessons[k + 'a'] || 0, s2 = p.lessons[k + 'b'] || 0;
+    const l = s.l, k = s.key, s1 = p.lessons[k + 'a'] || 0, s2 = p.lessons[k + 'b'] || 0, free = f.unlockAll || s.byParent;
     return `<span class="grip"></span>
     <div class="row"><span class="ava" style="--ac:color-mix(in srgb,${GRADES[g].c} 18%,var(--surface));border-radius:18px">${l.icon}</span><div style="min-width:0"><div class="eyebrow">Lớp ${g} · ${esc(T.title)}</div><h2 class="h2">${esc(l.title)}</h2></div></div>
     <div class="tipcard"><b>📌 Ghi nhớ</b><p>${esc(l.tip)}</p></div>
     <button class="lessonrow" data-act="startLesson" data-key="${k}a" data-kind="a" data-g="${g}" data-i="${i}"><span class="ic">📖</span><span class="tx"><b>Bước 1 · Bài học</b><span class="tiny muted">Pi giảng bài, xem ví dụ, làm thử 4 câu · tối đa 3 sao</span></span><span class="pill gold">${s1 ? '★'.repeat(s1) : 'Bắt đầu'}</span></button>
-    <button class="lessonrow" data-act="startLesson" data-key="${k}b" data-kind="b" data-g="${g}" data-i="${i}" ${s1 || f.unlockAll ? '' : 'disabled'}><span class="ic">✏️</span><span class="tx"><b>Bước 2 · Luyện tập</b><span class="tiny muted">${s1 || f.unlockAll ? '10 câu luyện tập · tối đa 3 sao' : 'Mở sau khi xong Bước 1'}</span></span><span class="pill gold">${s2 ? '★'.repeat(s2) : (s1 || f.unlockAll ? 'Bắt đầu' : '🔒')}</span></button>
+    <button class="lessonrow" data-act="startLesson" data-key="${k}b" data-kind="b" data-g="${g}" data-i="${i}" ${s1 || free ? '' : 'disabled'}><span class="ic">✏️</span><span class="tx"><b>Bước 2 · Luyện tập</b><span class="tiny muted">${s1 || free ? '10 câu luyện tập · tối đa 3 sao' : 'Mở sau khi xong Bước 1'}</span></span><span class="pill gold">${s2 ? '★'.repeat(s2) : (s1 || free ? 'Bắt đầu' : '🔒')}</span></button>
     ${missionCard(p, g, T)}`;
   };
 }
@@ -672,6 +675,7 @@ function vPHomeInner(f) {
       <div class="kv"><div><b>${lw}</b><span>bài tuần này</span></div><div><b>${Math.round(minsWeek / 60)}</b><span>phút học</span></div><div><b>${p.solved || 0}</b><span>câu làm đúng</span></div></div>
       <div><div class="tiny muted" style="font-weight:800;margin-bottom:6px">Số phút học 7 ngày qua</div><div class="bars">${days.map((d, k) => `<div class="b ${k === 6 ? 'today' : ''}" title="${mins[k]} phút"><i style="height:${Math.round(mins[k] / mx * 70)}px"></i><span>${k === 6 ? 'Nay' : wd[d.getDay()]}</span></div>`).join('')}</div></div>
       <div class="say">${pi('think', 40)}<div class="bubble tiny" style="font-weight:600">${esc(insightFor(f, c))}</div></div>
+      <button class="btn sm ghost" data-act="unlockSheet" data-cid="${c.id}">🔓 Mở khóa bài cho ${esc(c.name)}</button>
     </section>`;
   }).join('') + `<p class="sync">${syncLabel()}</p>`;
 }
@@ -717,7 +721,9 @@ function vPAccount(f) {
   <section class="card stack">
     <div class="field"><label for="cap">Mức sao tối đa mỗi tuần: <b class="num">${capOf(f)} sao = ${vnd(capOf(f) * STAR)}</b></label><input class="range" id="cap" type="range" min="10" max="${MAX_CAP}" step="5" value="${capOf(f)}" data-act-input="cap"><span class="tiny muted" style="font-weight:700">Tối đa ${MAX_CAP} sao/tuần. Sao vượt mức được ghi là sao luyện tập, không tính tiền.</span></div>
     <div class="divider"></div>
-    <div class="row between"><div style="min-width:0"><b>Mở khóa toàn bộ bài học</b><p class="tiny muted" style="font-weight:700">Con có thể mở bất kỳ bài nào, không cần học xong bài trước. Con luôn được chọn lớp 1–5.</p></div><button class="switch ${f.unlockAll ? 'on' : ''}" data-act="toggleUnlock" role="switch" aria-checked="${!!f.unlockAll}" aria-label="Mở khóa toàn bộ"></button></div>
+    <div class="stack" style="gap:6px"><b>Mở khóa bài theo trình độ của con</b><p class="tiny muted" style="font-weight:700">Chọn bài bất kỳ để mở cho từng con, hoặc chọn bài con bắt đầu học (các bài trước đó được mở để con ôn khi cần).</p><div class="row wrap">${f.children.map(c => `<button class="btn sm ghost" data-act="unlockSheet" data-cid="${c.id}">🔓 ${esc(c.name)}</button>`).join('')}</div></div>
+    <div class="divider"></div>
+    <div class="row between"><div style="min-width:0"><b>Mở khóa toàn bộ bài học (mọi con)</b><p class="tiny muted" style="font-weight:700">Mọi bài đều mở, không cần học xong bài trước. Con luôn được chọn lớp 1–5.</p></div><button class="switch ${f.unlockAll ? 'on' : ''}" data-act="toggleUnlock" role="switch" aria-checked="${!!f.unlockAll}" aria-label="Mở khóa toàn bộ"></button></div>
   </section>
   <h2 class="h3">Tài khoản ba mẹ</h2>
   <form class="card stack" data-form="parentInfo">
@@ -747,6 +753,33 @@ function childSheet(cid) {
     const del = UI.confirm === 'del:' + cid;
     return `<span class="grip"></span>${childForm(cid ? 'editChild' : 'addChild', c, cid ? 'Sửa hồ sơ của con' : 'Thêm hồ sơ con', cid ? 'Lưu' : 'Thêm con')}
     ${cid ? (del ? `<div class="demo stack" style="gap:8px">Xóa hồ sơ <b>${esc(c.name)}</b> và toàn bộ tiến độ, sao của con? Không thể hoàn tác.<div class="row"><button class="btn sm" data-act="delChild" data-cid="${cid}">Xóa hồ sơ</button><button class="btn sm ghost" data-act="cancelConfirm">Hủy</button></div></div>` : `<button class="btn block ghost" style="color:var(--wrong)" data-act="delAsk" data-cid="${cid}">Xóa hồ sơ này</button>`) : ''}`;
+  };
+}
+
+
+/* ---------- ba mẹ mở khóa bài cho con ---------- */
+function unlockSheet(cid) {
+  return () => {
+    const f = fam(), c = childOf(f, cid); if (!c) return '';
+    const p = prog(f, c.id); const g = UI.ulGrade || learnGrade(f, c); const states = nodeStates(f, c, g); const st = startOf(p, g);
+    const nUnl = states.filter(x => x.byParent && !x.done).length;
+    let html = '', lastT = 0;
+    states.forEach((x, i) => {
+      if (x.T.n !== lastT) { lastT = x.T.n; html += `<div class="ulT">${x.T.icon} ${esc(x.T.title)}</div>`; }
+      const label = x.type === 'lesson' ? x.l.title : (x.T.review ? x.T.title : 'Ôn tập chủ đề');
+      const status = x.done ? `<span class="pill jade">Đã học ${'★'.repeat(Math.min(x.stars, 6))}</span>` : x.open ? `<span class="pill gold">Đang mở</span>` : `<span class="pill">🔒 Khóa</span>`;
+      const forced = f.unlockAll || i === 0 || i <= st || (i > 0 && nodeDone(p, nodesOf(g)[i - 1]));
+      const on = isUnlocked(p, x.key) || (i <= st && i > 0);
+      html += `<div class="ulrow ${i === st && st ? 'start' : ''}"><span class="ic">${x.type === 'lesson' ? x.l.icon : '🏆'}</span><div class="tx"><b>${esc(label)}</b><div class="row wrap" style="gap:6px;margin-top:2px">${status}${i === st && st ? '<span class="pill red">Con bắt đầu từ đây</span>' : ''}${x.done || i === 0 || (i === st && st) ? '' : `<button class="link tiny" data-act="ulStart" data-cid="${cid}" data-g="${g}" data-i="${i}">Bắt đầu từ đây</button>`}</div></div>
+        ${x.done || i === 0 ? '' : `<button class="switch ${on || (forced && !isUnlocked(p, x.key) && x.open) ? 'on' : ''}" ${forced && !isUnlocked(p, x.key) && x.open ? 'disabled title="Bài này đã mở sẵn"' : ''} role="switch" aria-checked="${on}" aria-label="Mở khóa ${esc(label)}" data-act="ulToggle" data-cid="${cid}" data-key="${x.key}"></button>`}</div>`;
+    });
+    return `<span class="grip"></span>
+      <div class="row">${ava(c.avatar, 'sm')}<div style="min-width:0"><div class="eyebrow">Khu vực ba mẹ</div><h2 class="h2">Mở khóa bài cho ${esc(c.name)}</h2></div></div>
+      <p class="tiny muted" style="font-weight:700">Bật công tắc để mở riêng một bài. Bấm <b>Bắt đầu từ đây</b> để con học tiếp từ bài đó (mọi bài trước được mở để con ôn khi cần). Bài đã mở thì con làm được cả Bước 1 và Bước 2.</p>
+      <div class="gradebar">${[1, 2, 3, 4, 5].map(k => `<button class="chip ${k === g ? 'on' : ''}" style="--c:${GRADES[k].c}" data-act="ulGrade" data-cid="${cid}" data-g="${k}">Lớp ${k}${k === c.grade ? ' ⭐' : ''}</button>`).join('')}</div>
+      <div class="row wrap"><button class="btn sm jade" data-act="ulAll" data-cid="${cid}" data-g="${g}">Mở cả lớp ${g}</button><button class="btn sm ghost" data-act="ulReset" data-cid="${cid}" data-g="${g}">Khóa lại như cũ</button><span class="tiny muted" style="font-weight:800">${st ? `Bắt đầu: bài ${st + 1} · ` : ''}${nUnl} bài được mở thêm</span></div>
+      ${f.unlockAll ? '<div class="demo tiny">Đang bật "Mở khóa toàn bộ bài học" cho mọi con nên mọi bài đều mở. Tắt trong mục Tài khoản nếu muốn mở từng bài.</div>' : ''}
+      <div class="ullist">${html}</div>`;
   };
 }
 
@@ -815,6 +848,12 @@ const ACT = {
     const f = fam(), p = prog(f, d.cid); let s = 0; p.ledger.forEach(e => { if (!e.paid) { s += e.counted; e.paid = true; } });
     (f.payouts ||= []).push({ id: uid(), ts: Date.now(), cid: d.cid, stars: s, amount: s * STAR }); UI.confirm = null; saveFam(f); toast(`Đã ghi sổ trao ${vnd(s * STAR)}`);
   },
+  unlockSheet: d => { UI.ulGrade = null; UI.sheet = unlockSheet(d.cid); render(); },
+  ulGrade: d => { UI.ulGrade = +d.g; render(); },
+  ulToggle: d => { const f = fam(), p = prog(f, d.cid); p.unlocked ||= {}; if (p.unlocked[d.key]) delete p.unlocked[d.key]; else p.unlocked[d.key] = true; saveFam(f); render(); },
+  ulStart: d => { const f = fam(), p = prog(f, d.cid); p.startAt ||= {}; p.startAt[+d.g] = +d.i; saveFam(f); render(); toast(`Con sẽ học tiếp từ bài ${+d.i + 1} của lớp ${d.g}.`); },
+  ulAll: d => { const f = fam(), p = prog(f, d.cid); p.unlocked ||= {}; nodesOf(+d.g).forEach(n => { p.unlocked[n.key] = true; }); saveFam(f); render(); toast(`Đã mở cả lớp ${d.g}.`); },
+  ulReset: d => { const f = fam(), p = prog(f, d.cid); if (p.unlocked) nodesOf(+d.g).forEach(n => delete p.unlocked[n.key]); if (p.startAt) delete p.startAt[+d.g]; saveFam(f); render(); toast('Đã khóa lại theo thứ tự bài học.'); },
   toggleUnlock: () => { const f = fam(); f.unlockAll = !f.unlockAll; saveFam(f); render(); },
   addChild: () => { UI.edit = null; UI.editCid = null; UI.err = ''; UI.sheet = childSheet(null); render(); },
   editChild: d => { UI.edit = null; UI.editCid = d.cid; UI.err = ''; UI.confirm = null; UI.sheet = childSheet(d.cid); render(); },
