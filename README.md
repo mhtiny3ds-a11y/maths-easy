@@ -18,7 +18,7 @@ Web app học Toán cho học sinh tiểu học, lớp 1 đến lớp 5, sắp x
   - *Thưởng:* số tiền chưa trao, bảng sao theo tuần, ghi sổ "Đã trao thưởng".
   - *Tài khoản:* thêm/sửa/xóa hồ sơ con, đổi PIN, mật khẩu, mức sao tối đa, mở khóa toàn bộ bài, sao lưu và khôi phục dữ liệu.
   - Khu vực ba mẹ tự khóa sau 10 phút không thao tác. Quên mật khẩu thì đặt lại bằng mã PIN ba mẹ.
-- **Ủng hộ (donate):** ở màn Ba mẹ đăng nhập và cuối tab Tổng quan có mục "Tiếp lửa để Team Mèo Pi thêm động lực đồng hành và phát triển cùng con nha ba mẹ ☕". Ba mẹ chọn mức gợi ý **39k, 59k, 99k** (mã QR có sẵn số tiền) hoặc **Tuỳ tâm** (mã QR gốc, tự nhập số tiền), và bấm **⬇️ Tải mã QR** để lưu ảnh rồi mở trong ứng dụng ngân hàng. Kèm ghi chú ủng hộ là tự nguyện, không ràng buộc. Thông tin tài khoản và các mức sửa trong `js/donate.js`.
+- **Mời ly Coffee (ủng hộ):** ở màn Ba mẹ đăng nhập và cuối tab Tổng quan có mục "Mời ly Coffee để Mèo Pi có thêm sức mạnh đồng hành và phát triển cùng các con nha ba mẹ ☕". Ba mẹ chọn **Sữa đá**, **Latte** hoặc **Cà phê Muối** (giao diện chỉ hiện tên, số tiền có sẵn trong mã QR), nội dung chuyển khoản "Thank you Pi nha", và bấm **⬇️ Tải mã QR** để lưu ảnh rồi mở trong ứng dụng ngân hàng. Kèm ghi chú ủng hộ là tự nguyện, không ràng buộc. Tên, số tiền từng loại, nội dung và tài khoản sửa trong `js/donate.js`.
 - Lớp 1–2: nếu máy có giọng đọc tiếng Việt, đề bài được đọc to tự động; nút 🔊 để nghe lại.
 
 ## Tài liệu
