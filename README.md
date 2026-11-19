@@ -11,6 +11,7 @@ Web app học Toán cho học sinh tiểu học, lớp 1 đến lớp 5, sắp x
 - **Mỗi bài 2 bước:** *Bài học* (Pi giảng phần ghi nhớ, làm mẫu 2 ví dụ, con làm thử 4 câu) và *Luyện tập* (10 câu). Câu hỏi được sinh ngẫu nhiên mỗi lần nên làm lại không bị trùng. Có hình minh họa: đồ vật để đếm, tia số, đồng hồ, thước kẻ, nhiệt kế, hình phẳng, hình khối, phân số, biểu đồ cột, biểu đồ tranh, biểu đồ hình quạt, tờ tiền… Trả lời sai thì Pi giải thích, câu đó quay lại ở cuối bài.
 - **Nhiệm vụ thực tế:** mỗi chủ đề có một việc làm cùng ba mẹ (đo bàn học, đếm tiền đi chợ…). Con bấm "đã làm xong", ba mẹ xác nhận thì con được **+2 sao**.
 - **Sao thưởng:** mỗi bước được 1–3 sao theo tỉ lệ đúng lần đầu. Gợi ý **1 sao = 1.000đ** do ba mẹ tự thưởng cho con (app không giữ hay chuyển tiền), hệ thống **tính tối đa 50 sao/tuần** (ba mẹ có thể hạ mức này). Sao vượt mức được ghi là "sao luyện tập", không tính tiền. Có huy hiệu và chuỗi ngày học 🔥.
+- **Thú cưng:** ngoài hũ sao, con chọn nuôi một bạn (Rồng Mây, Thỏ Bông, Cún Đốm, Gà Lửa). Mỗi lần con học xong một bước, thú cưng được ăn, nhận điểm lớn (số sao + 1; nhiệm vụ được duyệt +3), cảm ơn con và lên cấp. Thú cưng đổi hình dáng và to dần theo lộ trình: Quả trứng → Em bé → Nhí nhảnh (cấp 3) → Thiếu niên (cấp 7) → Trưởng thành (cấp 12) → Huyền thoại (cấp 18). Ngày chưa học thì thú cưng hơi đói, không bao giờ bị mất. Mã nguồn: `js/pets.js`.
 - **Con đăng nhập** bằng mã PIN 4 số, chọn lớp muốn học (được ôn lại lớp dưới).
 - **Ba mẹ đăng nhập** bằng số điện thoại/email + mật khẩu (hoặc mã PIN ba mẹ):
   - *Tổng quan:* sao tuần này, số phút học 7 ngày, gợi ý bài cần luyện lại.
@@ -19,7 +20,7 @@ Web app học Toán cho học sinh tiểu học, lớp 1 đến lớp 5, sắp x
   - *Tài khoản:* thêm/sửa/xóa hồ sơ con, đổi PIN, mật khẩu, mức sao tối đa, mở khóa toàn bộ bài, sao lưu và khôi phục dữ liệu.
   - **🔓 Mở khóa bài theo trình độ của con:** từ thẻ của con ở tab Tổng quan hoặc mục Tài khoản, ba mẹ chọn lớp rồi bật mở **bài bất kỳ**, hoặc bấm **Bắt đầu từ đây** để con học tiếp từ bài đó (các bài trước được mở để con ôn khi cần). Có nút **Mở cả lớp** và **Khóa lại như cũ**. Mỗi con cài đặt riêng.
   - Khu vực ba mẹ tự khóa sau 10 phút không thao tác. Quên mật khẩu thì đặt lại bằng mã PIN ba mẹ.
-- **Mời ly Coffee (ủng hộ):** ở màn Ba mẹ đăng nhập và cuối tab Tổng quan có mục "Mời ly Coffee để Mèo Pi có thêm sức mạnh đồng hành và phát triển cùng các con nha ba mẹ ☕". Ba mẹ chọn **Sữa đá**, **Latte** hoặc **Cà phê Muối** (giao diện chỉ hiện tên, số tiền có sẵn trong mã QR), nội dung chuyển khoản "Thank you Pi nha", và bấm **⬇️ Tải mã QR** để lưu ảnh rồi mở trong ứng dụng ngân hàng. Kèm ghi chú ủng hộ là tự nguyện, không ràng buộc. Tên, số tiền từng loại, nội dung và tài khoản sửa trong `js/donate.js`.
+- **Mời ly Coffee (ủng hộ):** chỉ hiện khi ít nhất một bé đã hoàn thành 3 bài học (đủ Bài học và Luyện tập). Khi đó, ở màn Ba mẹ đăng nhập và cuối tab Tổng quan có mục "Mời ly Coffee để Mèo Pi có thêm sức mạnh đồng hành và phát triển cùng các con nha ba mẹ ☕". Ba mẹ chọn **Sữa đá**, **Latte** hoặc **Cà phê Muối** (giao diện chỉ hiện tên, số tiền có sẵn trong mã QR), nội dung chuyển khoản "Thank you Pi nha", và bấm **⬇️ Tải mã QR** để lưu ảnh rồi mở trong ứng dụng ngân hàng. Kèm ghi chú ủng hộ là tự nguyện, không ràng buộc. Tên, số tiền từng loại, nội dung và tài khoản sửa trong `js/donate.js`.
 - Lớp 1–2: nếu máy có giọng đọc tiếng Việt, đề bài được đọc to tự động; nút 🔊 để nghe lại.
 
 ## Tài liệu
@@ -47,6 +48,8 @@ Bấm **Mở gia đình mẫu** ở màn hình đầu (khung này tự ẩn khi 
 - `js/app.js`: tài khoản, lộ trình, bài học, sao thưởng, khu vực ba mẹ.
 - `js/donate.js`: thông tin ủng hộ, mã QR gốc và các mức gợi ý.
 - `js/vendor/qrcode.js`: thư viện tạo mã QR (giấy phép MIT).
+- `js/pets.js`: thú cưng (vẽ hình, cho ăn, lên cấp).
+- `fonts/`, `css/fonts.css`: phông Baloo 2 và Nunito nhúng sẵn (giấy phép SIL OFL 1.1, xem `fonts/OFL-*.txt`). App không tải gì từ máy chủ bên ngoài, nên địa chỉ IP của người dùng không bị gửi đi đâu.
 - `tests/gen.test.js`: sinh thử mọi dạng bài hàng trăm lần để kiểm tra đáp án. Chạy `node tests/gen.test.js`.
 
 ### Sửa nội dung bài học

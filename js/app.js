@@ -159,6 +159,8 @@ async function seedDemo() {
     log: [{ ts: now - 2 * 864e5, key: 'g3t1r', stars: 3 }, { ts: now - 864e5, key: 'g3t2l1a', stars: 3 }, { ts: now - 864e5, key: 'g3t2l1b', stars: 2 }],
     streak: { last: d(1), count: 4 }, secs: { [d(4)]: 600, [d(3)]: 780, [d(2)]: 1260, [d(1)]: 900 }, solved: 214 };
   f.payouts = [{ id: 'p0', ts: now - 6 * 864e5, cid: 'ti', stars: 38, amount: 38000 }];
+  f.progress.bong.pet = { species: 'tho', name: 'Bông Gòn', xp: 9, meals: 3, lastFed: today, fedDays: { [today]: 1 }, born: now - 2 * 864e5 };
+  f.progress.ti.pet = { species: 'rong', name: 'Mây Xanh', xp: 104, meals: 24, lastFed: d(1), fedDays: { [d(1)]: 2 }, born: now - 12 * 864e5 };
   STORE.families.demo = f; persist();
 }
 
@@ -249,8 +251,15 @@ function donateImage(lv) {
   } catch (e) { return DONATE_QR; }
 }
 function donateLevels() { return (typeof DONATE_LEVELS !== 'undefined' && typeof qrcode !== 'undefined') ? DONATE_LEVELS : []; }
-function donateBlock() {
-  if (typeof DONATE_QR === 'undefined') return '';
+/* Mục mời cafe chỉ hiện khi ít nhất một bé đã hoàn thành 3 bài học (đủ cả Bài học và Luyện tập). */
+const DONATE_AFTER = 3;
+function lessonsCompleted(p) { return Object.keys(p.lessons).filter(k => /l\d+a$/.test(k) && p.lessons[k] > 0 && p.lessons[k.slice(0, -1) + 'b'] > 0).length; }
+function donateEligible(f) {
+  const fams = f ? [f] : Object.values(STORE.families).filter(x => !x.demo);
+  return fams.some(x => (x.children || []).some(c => lessonsCompleted(prog(x, c.id)) >= DONATE_AFTER));
+}
+function donateBlock(f) {
+  if (typeof DONATE_QR === 'undefined' || !donateEligible(f)) return '';
   const lvs = donateLevels(); const idx = lvs[UI.donIdx] ? UI.donIdx : 0; const lv = lvs[idx] || null;
   return `<section class="card stack" aria-labelledby="donate-h">
     <div class="row">${pi('cheer', 52)}<h2 class="h3" id="donate-h" style="flex:1;min-width:0">Mời ly Coffee để Mèo Pi có thêm sức mạnh đồng hành và phát triển cùng các con nha ba mẹ ☕</h2></div>
@@ -403,9 +412,10 @@ function vChild() {
   if (UI.tab === 'learn') body = vLearn(f, c, p);
   else if (UI.tab === 'missions') body = vMissions(f, c, p);
   else if (UI.tab === 'rewards') body = vRewards(f, c, p);
+  else if (UI.tab === 'pet') body = vPet(f, c, p);
   else body = vMe(f, c, p);
   const pending = Object.values(p.missions).filter(m => m.status === 'pending').length;
-  const tabs = [['learn', '🗺️', 'Học'], ['missions', '🎯', 'Nhiệm vụ'], ['rewards', '⭐', 'Hũ sao'], ['me', ava(c.avatar, 'xs'), 'Của con']];
+  const tabs = [['learn', '🗺️', 'Học'], ['missions', '🎯', 'Nhiệm vụ'], ['pet', p.pet ? petSvg(p.pet, 30, 'happy') : '🥚', 'Thú cưng'], ['rewards', '⭐', 'Hũ sao'], ['me', ava(c.avatar, 'xs'), 'Của con']];
   return top + body + `<nav class="tabbar" aria-label="Điều hướng"><div class="in">${tabs.map(([k, i, t]) => `<button class="tab ${UI.tab === k ? 'on' : ''}" data-act="tab" data-t="${k}" aria-current="${UI.tab === k}"><span class="i">${i}</span>${t}${k === 'missions' && pending ? ` <span class="pill red" style="padding:0 6px;font-size:11px">${pending}</span>` : ''}</button>`).join('')}</div></nav>`;
 }
 function vGradePick() {
@@ -446,6 +456,7 @@ function vLearn(f, c, p) {
   return `<div class="gradebar" role="tablist">${[1, 2, 3, 4, 5].map(k => `<button class="chip ${k === g ? 'on' : ''}" style="--c:${GRADES[k].c}" data-act="grade" data-g="${k}" role="tab" aria-selected="${k === g}">Lớp ${k}${k === c.grade ? ' ⭐' : ''}</button>`).join('')}<button class="chip" data-act="toGradePick" aria-label="Chọn lớp">Đổi lớp</button></div>
   <section class="world" style="--c:${G.c}">${pi(cur ? 'happy' : 'cheer', 74, 'bob')}<div style="flex:1;min-width:0;position:relative;z-index:1"><div class="s">Toán lớp ${g} · Chương trình GDPT 2018</div><div class="t">${G.world}</div><div class="s">${done}/${states.length} chặng · ${CUR[g].length} chủ đề</div><div class="bar"><i style="width:${Math.round(done / states.length * 100)}%"></i></div></div></section>
   <div class="say">${pi('happy', 44)}<div class="bubble" style="font-weight:600">${hello}</div></div>
+  ${!p.pet ? `<button class="choice" data-act="tab" data-t="pet"><span class="ic" style="background:var(--gold-soft)">🥚</span><span><b>Chọn thú cưng để nuôi</b><span class="muted tiny">Học xong mỗi bài, bạn ấy được ăn và lớn lên!</span></span></button>` : !petFedToday(p.pet) ? `<div class="say">${petSvg(p.pet, 48)}<div class="bubble" style="font-weight:600">${esc(petName(p.pet))} đói bụng rồi! Học một bài cho bạn ấy ăn nhé.</div></div>` : ''}
   <div class="path">${pathHtml}</div>`;
 }
 function missionCard(p, g, T, withBtn = true) {
@@ -603,10 +614,17 @@ function finishLesson() {
   p.log.push({ ts: Date.now(), key: L.key, stars });
   if (p.log.length > 400) p.log = p.log.slice(-400);
   bumpStreak(p);
+  const fr = feedPet(p, stars);
   const secs = Math.min(1500, Math.round((Date.now() - L.start) / 1000)); const dk = dayKey(); p.secs[dk] = (p.secs[dk] || 0) + secs;
   saveFam(f);
-  UI.result = { stars, prev, gain, aw, pct, title: L.title, sub: L.sub, g: L.g, i: L.i, kind: L.kind, key: L.key, ws: weekStars(f, c.id), cap: capOf(f) };
+  UI.result = { fr, stars, prev, gain, aw, pct, title: L.title, sub: L.sub, g: L.g, i: L.i, kind: L.kind, key: L.key, ws: weekStars(f, c.id), cap: capOf(f) };
   go('result');
+}
+function petResult(r) {
+  const f = fam(), c = curChild(); const p = c && prog(f, c.id);
+  if (!p) return '';
+  if (!p.pet || !r.fr) return `<button class="choice" data-act="toPet"><span class="ic" style="background:var(--gold-soft)">🥚</span><span><b>Con chưa có thú cưng!</b><span class="muted tiny">Chọn một bạn để nuôi, mỗi bài học xong bạn ấy được ăn và lớn lên.</span></span></button>`;
+  return `<section class="card petfeed ${r.fr.grew || r.fr.levelUp ? 'up' : ''}"><div class="eat"><span class="food">${r.fr.food}</span>${petSvg(p.pet, 110, 'eat', 'bob')}</div><div style="flex:1;min-width:0;text-align:left"><b>${esc(petName(p.pet))} · Cấp ${petLevel(p.pet.xp)}</b><p style="font-weight:600">${petThanks(c, p.pet, r.fr)}</p><span class="pill jade">+${r.fr.gain} điểm lớn</span></div></section>`;
 }
 function vResult() {
   const r = UI.result; const star = k => `<span class="${k < r.stars ? '' : 'off'}">⭐</span>`;
@@ -620,6 +638,7 @@ function vResult() {
     <div class="stars3">${star(0)}${star(1)}${star(2)}</div>
     <div class="statgrid"><div class="stat"><b>${Math.round(r.pct * 100)}%</b><span>đúng lần đầu</span></div><div class="stat"><b>+${r.gain ? r.aw.counted : 0}</b><span>sao vào hũ</span></div><div class="stat"><b>${r.ws}/${r.cap}</b><span>sao tuần này</span></div></div>
     <div class="say" style="text-align:left;width:100%">${bi(52)}<div class="bubble" style="font-weight:600">${earned}</div></div>
+    ${petResult(r)}
     <div class="stack" style="width:100%">
       ${r.kind === 'a' ? `<button class="btn block jade" data-act="startLesson" data-key="${r.key.replace(/a$/, 'b')}" data-kind="b" data-g="${r.g}" data-i="${r.i}">Luyện tập ngay ✏️</button>` : `<button class="btn block jade" data-act="backMap">Về bản đồ</button>`}
       <button class="btn block ghost" data-act="backMap" data-sheet="1">Xem nhiệm vụ của chủ đề</button>
@@ -657,7 +676,7 @@ function insightFor(f, c) {
 }
 function vPHome(f) {
   const fresh = UI.fresh ? `<section class="card stack" style="border-color:var(--jade)"><div class="say">${pi('cheer', 56)}<div class="bubble">Tài khoản đã sẵn sàng! Đưa máy cho con, bấm <b>Cho con vào học</b>, con chọn tên mình và nhập mã PIN.</div></div><button class="btn block jade" data-act="toKids">🎒 Cho con vào học</button><button class="btn block ghost" data-act="addChild">+ Thêm hồ sơ con khác</button></section>` : '';
-  return fresh + vPHomeInner(f) + donateBlock();
+  return fresh + vPHomeInner(f) + donateBlock(f);
 }
 function vPHomeInner(f) {
   if (!f.children.length) return `<div class="card stack"><p style="font-weight:700">Chưa có hồ sơ con nào.</p><button class="btn jade" data-act="addChild">Thêm hồ sơ con</button></div>`;
@@ -671,6 +690,7 @@ function vPHomeInner(f) {
     const lg = learnGrade(f, c); const st = nodeStates(f, c, lg); const doneN = st.filter(s => s.done).length;
     return `<section class="card kid">
       <div class="row">${ava(c.avatar, 'sm')}<div style="flex:1;min-width:0"><b class="h3" style="display:block">${esc(c.name)}</b><span class="tiny muted" style="font-weight:800">Lớp ${c.grade} · đang học Lớp ${lg} · ${doneN}/${st.length} chặng</span></div><span class="statpill">🔥 ${streakNow(p)}</span></div>
+      ${p.pet ? `<div class="row" style="gap:8px">${petSvg(p.pet, 44)}<span class="tiny" style="font-weight:800">Thú cưng: ${esc(petName(p.pet))} · Cấp ${petLevel(p.pet.xp || 0)} · ${PET_STAGES[petStage(p.pet)].name}${petFedToday(p.pet) ? '' : ' · hôm nay chưa được ăn'}</span></div>` : '<span class="tiny muted" style="font-weight:800">Con chưa chọn thú cưng.</span>'}
       <div><div class="row between tiny" style="font-weight:800"><span>Sao tuần này</span><span class="num">${ws}/${cp} · ${vnd(ws * STAR)}</span></div><div class="meter" style="margin-top:4px"><i style="width:${Math.round(ws / cp * 100)}%"></i></div></div>
       <div class="kv"><div><b>${lw}</b><span>bài tuần này</span></div><div><b>${Math.round(minsWeek / 60)}</b><span>phút học</span></div><div><b>${p.solved || 0}</b><span>câu làm đúng</span></div></div>
       <div><div class="tiny muted" style="font-weight:800;margin-bottom:6px">Số phút học 7 ngày qua</div><div class="bars">${days.map((d, k) => `<div class="b ${k === 6 ? 'today' : ''}" title="${mins[k]} phút"><i style="height:${Math.round(mins[k] / mx * 70)}px"></i><span>${k === 6 ? 'Nay' : wd[d.getDay()]}</span></div>`).join('')}</div></div>
@@ -837,7 +857,7 @@ const ACT = {
   approve: d => {
     const f = fam(), p = prog(f, d.cid), m = p.missions[d.key]; if (!m || m.status !== 'pending') return;
     const x = lessonByKey(d.key); const r = award(f, d.cid, MISSION_STARS, `Nhiệm vụ: ${x ? x.T.title : ''} · Lớp ${x ? x.g : ''}`);
-    m.status = 'approved'; m.approvedAt = Date.now(); saveFam(f);
+    m.status = 'approved'; m.approvedAt = Date.now(); feedPet(p, 0, 'mission'); saveFam(f);
     toast(r.counted ? `Đã xác nhận · +${r.counted} sao cho ${childOf(f, d.cid).name}` : `Đã xác nhận · tuần này con đã đủ ${capOf(f)} sao`);
   },
   reject: d => { const f = fam(), p = prog(f, d.cid); delete p.missions[d.key]; saveFam(f); toast('Đã trả lại nhiệm vụ để con làm lại.'); },
@@ -866,6 +886,8 @@ const ACT = {
   },
   logout: () => { DEV.session = null; saveDev(); go('welcome'); },
   toKids: () => { DEV.session = null; saveDev(); UI.fresh = false; go('profiles'); },
+  toPet: () => go('child', { tab: 'pet' }),
+  petChoose: d => { const f = fam(), c = curChild(), p = prog(f, c.id); if (p.pet) return; p.pet = { species: d.sp, name: PET_SPECIES[d.sp].name, xp: 0, meals: 0, born: Date.now() }; saveFam(f); render(); toast(`Chào ${PET_SPECIES[d.sp].name}! Học xong một bài để trứng nở nhé!`); },
   donIdx: d => { UI.donIdx = +d.v; render(); },
   dlQR: d => {
     const lv = donateLevels()[+d.v] || null, url = donateImage(lv), a = document.createElement('a');
@@ -951,6 +973,7 @@ const FORMS = {
     if (pass.length < 6) { UI.err = 'Mật khẩu mới cần ít nhất 6 ký tự.'; return render(); }
     f.passHash = await hashPw(pass); saveFam(f); UI.forgotTries = 0; go('parentLogin'); toast('Đã đặt mật khẩu mới. Mời ba mẹ đăng nhập.');
   },
+  petName: fd => { const f = fam(), c = curChild(), p = prog(f, c.id); const n = String(fd.get('name') || '').trim().slice(0, 20); if (!p.pet || !n) return; p.pet.name = n; saveFam(f); toast(`Đã đặt tên thú cưng là ${n}.`); },
   parentInfo: async fd => {
     const f = fam(); const name = fd.get('name').trim(), ppin = fd.get('ppin').trim(), pass = fd.get('pass');
     if (!name) { UI.err = 'Tên hiển thị không được để trống.'; return render(); }

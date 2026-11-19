@@ -351,3 +351,26 @@ body.still .qcard,body.still .exq,body.still .flash{animation:none}
 .ulrow .tx{flex:1;min-width:0}.ulrow .tx b{display:block;font-size:14px;line-height:1.25}
 .switch[disabled]{opacity:.45;pointer-events:none}
 .sheet>*{flex-shrink:0}
+
+/* ===== thú cưng ===== */
+.petpick{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.petopt{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 10px;border-radius:var(--r-lg);background:var(--surface);border:2px solid var(--line);box-shadow:var(--shadow);text-align:center}
+.petopt b{font-family:var(--f-display);font-size:18px}
+.petopt:active{transform:translateY(2px)}
+.petcard{display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg,color-mix(in srgb,var(--pc) 22%,var(--surface)) 0%,var(--surface) 70%)}
+.petstage{display:flex;justify-content:center;align-items:flex-end;min-height:150px;margin-top:-20px;position:relative}
+.petstage::after{content:"";position:absolute;bottom:4px;width:150px;height:16px;border-radius:50%;background:rgba(84,52,20,.12)}
+.petstage .mascot{position:relative;z-index:1}
+.evo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.evo-i{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:var(--r-md);background:var(--surface);border:2px solid var(--line);text-align:center}
+.evo-i b{font-size:13px;line-height:1.2}.evo-i span{font-size:11px;font-weight:800;color:var(--ink-3)}
+.evo-i.off .mascot{filter:brightness(0) opacity(.18)}
+.evo-i.cur{border-color:var(--jade);background:var(--jade-soft)}
+.petfeed{display:flex;gap:10px;align-items:center;width:100%;text-align:left}
+.petfeed.up{border-color:var(--gold);background:var(--gold-soft)}
+.petfeed b{font-family:var(--f-display);font-size:17px}
+.petfeed p{font-size:14px;margin:2px 0 6px}
+.eat{position:relative;flex:none}
+.eat .food{position:absolute;left:50%;top:44%;font-size:30px;animation:munch 1.6s ease-in .2s both;z-index:2}
+@keyframes munch{0%{transform:translate(-60px,-50px) scale(1);opacity:1}60%{transform:translate(-14px,4px) scale(.8);opacity:1}100%{transform:translate(-14px,10px) scale(0);opacity:0}}
+.tab .i .mascot{display:inline-block;vertical-align:middle}
